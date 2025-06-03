@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Search {
      /**
      * Finds the location of the nearest reachable cheese from the rat's position.
@@ -29,6 +31,59 @@ public class Search {
      * @throws HungryRatException if there is no reachable cheese
      */
     public static int[] nearestCheese(char[][] maze) throws EscapedRatException, CrowdedMazeException, HungryRatException {
-        return null;
+        boolean[][] visited = new boolean[maze.length][maze[0].length];
+       
+        Queue<int[]> que = new LinkedList<>();
+        que.add(ratLocation(maze));
+        while(!que.isEmpty()){
+             int[] current = que.poll();
+            if(visited[current[0]][current[1]]) continue;
+
+            visited[current[0]][current[1]] = true;
+
+            if(maze[current[0]][current[1]] == 'c') return current;
+            que.addAll(getNeighbors(maze, current));
+                // for(int[] neighbor: getNeighbors(maze, current)){
+                //     que.add(neighbor);
+                // }
+            
+        }
+
+        throw new HungryRatException();
+    }
+
+    public static List<int[]> getNeighbors(char[][] maze, int[] current){
+        int curR = current[0];
+        int curC = current[1];
+        int[][] directions = {{-1,0}, {1,0}, {0,-1}, { 0,1}}; //up down left right
+        List<int[]> moves = new ArrayList<>();
+        for(int[] dir: directions){
+            int changeR = dir[0];
+            int changeC = dir[1];
+
+            int newR = curR + changeR;
+            int newC = curC + changeC;
+
+            if(newR>=0 && newR < maze.length && 
+            newC >= 0 && newC < maze[newR].length && 
+            maze[newR][newC] != 'w'){
+                moves.add(new int[] {newR, newC});
+            }
+        }
+        return moves;
+    }
+
+    public static int[] ratLocation(char[][] maze) throws EscapedRatException, CrowdedMazeException{
+        int [] location = null;
+        for(int r=0; r<maze.length; r++){
+            for(int c=0; c<maze[r].length; c++){
+                if(maze[r][c] == 'R'){
+                    if(location != null) throw new CrowdedMazeException();
+                    location = new int[] {r, c};
+                }
+            }
+        }
+        if(location == null) throw new EscapedRatException();
+        return location;
     }
 }
